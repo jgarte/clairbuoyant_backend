@@ -3,9 +3,31 @@
 
 
 class NDBCScraper:
+    """NDBC Scraper Object."""
+
+    ACTIVE_BUOYS_XML = "https://www.ndbc.noaa.gov/activestations.xml"
+
+    """Request Parameters for Observations.
+    request = GetObservation
+    service = SOS
+    version = 1.0.0
+    offering = urn:ioos:station:wmo::<station ID> for single station,
+        or urn:ioos:network:noaa.nws.ndbc:all for use with collections.
+    observedproperty = one of the following:
+        air_pressure_at_sea_level
+        air_temperature
+        currents
+        sea_floor_depth_below_sea_surface (water level for tsunami stations)
+        sea_water_electrical_conductivity
+        sea_water_salinity
+        sea_water_temperature
+        waves
+    """
+    # Both take station as a GET argument.
+    OBS_ENDPOINT = "https://sdf.ndbc.noaa.gov/sos/server.php"
+
     def get_station_xml():
         pass
-        # active_buoys_xml = URI.parse("https://www.ndbc.noaa.gov/activestations.xml")
 
         # ndbc_data = Net::HTTP.get(active_buoys_xml)
         # xml = Nokogiri.XML(ndbc_data)
@@ -84,8 +106,7 @@ class NDBCScraper:
         #     self.realtime_meteorological_data(buoy_obj.station_code)
 
 
-"""
- !Note
+"""NOTE:
  Update attributes if the below is checked 'y' / or other.
  - met: indicates whether the station has reported meteorological data in the
    past eight hours (y/n).
