@@ -22,6 +22,7 @@ class NDBCScraper:
         sea_water_salinity
         sea_water_temperature
         waves
+    responseformat=text/csv
     """
     # Both take station as a GET argument.
     OBS_ENDPOINT = "https://sdf.ndbc.noaa.gov/sos/server.php"
@@ -105,6 +106,28 @@ class NDBCScraper:
         # Buoy.all.each do |buoy_obj|
         #     self.realtime_meteorological_data(buoy_obj.station_code)
 
+
+"""NOTE: XML Data
+<ows:Keywords>
+    <ows:Keyword>Weather</ows:Keyword>
+    <ows:Keyword>National Data Buoy Center</ows:Keyword>
+    <ows:Keyword>NDBC</ows:Keyword>
+    <ows:Keyword>Moored Buoy</ows:Keyword>
+    <ows:Keyword>C-MAN</ows:Keyword>
+    <ows:Keyword>DART</ows:Keyword>
+    <ows:Keyword>TAO</ows:Keyword>
+    <ows:Keyword>Air Temperature</ows:Keyword>
+    <ows:Keyword>Barometric Pressure</ows:Keyword>
+    <ows:Keyword>Conductivity</ows:Keyword>
+    <ows:Keyword>Ocean Currents</ows:Keyword>
+    <ows:Keyword>Salinity</ows:Keyword>
+    <ows:Keyword>Water Level</ows:Keyword>
+    <ows:Keyword>Water Temperature</ows:Keyword>
+    <ows:Keyword>Waves</ows:Keyword>
+    <ows:Keyword>Winds</ows:Keyword>
+</ows:Keywords>
+
+"""
 
 """NOTE:
  Update attributes if the below is checked 'y' / or other.
