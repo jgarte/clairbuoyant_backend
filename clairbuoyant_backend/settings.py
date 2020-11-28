@@ -86,7 +86,7 @@ WSGI_APPLICATION = 'clairbuoyant_backend.wsgi.application'
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": get_secret("DB_DEV_NAME"),
         "USER": get_secret("DB_USER"),
         "PASSWORD": get_secret("DB_PASSWORD"),
