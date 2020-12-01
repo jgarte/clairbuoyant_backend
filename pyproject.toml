@@ -23,6 +23,9 @@ django-cors-headers = "^3.5.0"
 psycopg2 = "^2.8.6"
 python = "^3.9"
 djangorestframework-gis = "^0.16"
+beautifulsoup4 = "^4.9.3"
+requests = "^2.25.0"
+lxml = "^4.6.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
