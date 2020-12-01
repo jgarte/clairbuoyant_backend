@@ -16,7 +16,7 @@ class Buoy(models.Model):
     seq = models.PositiveSmallIntegerField("seq attribute", blank=True)
 
     def __str__(self):
-        return self.name
+        return f"Buoy({self.station_id} | {self.name})"
 
 
 class Observation(models.Model):
