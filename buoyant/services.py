@@ -1,39 +1,39 @@
 """NDBC Scraper Service."""
 # ? considering this namespace for scraping logic instead of model/view/admin
+import requests
+from bs4 import BeautifulSoup as bs
 
 
-class NDBCScraper:
-    """NDBC Scraper Object."""
+def NDBCScraper():
+    """NDBC Scraper.
 
-    ACTIVE_BUOYS_XML = "https://www.ndbc.noaa.gov/activestations.xml"
-
-    """Request Parameters for Observations.
-    request = GetObservation
-    service = SOS
-    version = 1.0.0
-    offering = urn:ioos:station:wmo::<station ID> for single station,
-        or urn:ioos:network:noaa.nws.ndbc:all for use with collections.
-    observedproperty = one of the following:
-        air_pressure_at_sea_level
-        air_temperature
-        currents
-        sea_floor_depth_below_sea_surface (water level for tsunami stations)
-        sea_water_electrical_conductivity
-        sea_water_salinity
-        sea_water_temperature
-        waves
-    responseformat=text/csv
+    Request Parameters for Observations.
+        request = GetObservation
+        service = SOS
+        version = 1.0.0
+        offering = urn:ioos:station:wmo::<station ID> for single station,
+            or urn:ioos:network:noaa.nws.ndbc:all for use with collections.
+        observedproperty = one of the following:
+            air_pressure_at_sea_level
+            air_temperature
+            currents
+            sea_floor_depth_below_sea_surface (water level for tsunami stations)
+            sea_water_electrical_conductivity
+            sea_water_salinity
+            sea_water_temperature
+            waves
+        responseformat=text/csv
     """
-    # Both take station as a GET argument.
-    OBS_ENDPOINT = "https://sdf.ndbc.noaa.gov/sos/server.php"
+    ACTIVESTATIONS_XML = "https://www.ndbc.noaa.gov/activestations.xml"
+    # OBS_ENDPOINT = "https://sdf.ndbc.noaa.gov/sos/server.php"
 
     def get_station_xml():
-        pass
+        xml_data = requests.get(ACTIVESTATIONS_XML).content
 
-        # ndbc_data = Net::HTTP.get(active_buoys_xml)
-        # xml = Nokogiri.XML(ndbc_data)
+        soup = bs(xml_data, "xml")
+        stations = soup.find_all('station')
+        print(len(stations))  # => 1439
 
-        # stations = xml.xpath("//station")
         # Buoy.create!(
         # station_code: station[:id],
         # station_name: station[:name],
@@ -45,15 +45,6 @@ class NDBCScraper:
         # dart: station[:dart],
         # currents: station[:currents],
         # waterquality: station[:waterquality])
-
-    # Web crawler to extract buoy specific information
-    def get_station_links():
-        pass
-        # station_list_url = 'https://www.ndbc.noaa.gov/to_station.shtml'
-        # html = URI.open(station_list_url)
-        # doc = Nokogiri::HTML(html)
-
-        # station_pages = doc.css('pre a').map { |link| link['href'] }
 
     def realtime_meteorological_data(station_id):
         pass
@@ -102,9 +93,11 @@ class NDBCScraper:
         #     )
 
     def run():
-        pass
+        get_station_xml()
         # Buoy.all.each do |buoy_obj|
         #     self.realtime_meteorological_data(buoy_obj.station_code)
+
+    run()
 
 
 """NOTE: XML Data
@@ -140,3 +133,5 @@ class NDBCScraper:
  - dart: indicates whether the station has reported water column height/tsunami
    data in the past 24 hours (y/n).
 """
+
+NDBCScraper()
