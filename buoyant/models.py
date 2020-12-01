@@ -9,10 +9,10 @@ class Buoy(models.Model):
     elev = models.PositiveSmallIntegerField("elevation", blank=True)
     pgm = models.CharField(max_length=50)
     buoy_type = models.CharField(max_length=10)
-    met = models.CharField(max_length=1, blank=True)
-    currents = models.CharField(max_length=1, blank=True)
-    waterquality = models.CharField(max_length=1, blank=True)
-    dart = models.CharField(max_length=1, blank=True)
+    met = models.CharField(max_length=1, default='n')
+    currents = models.CharField(max_length=1, default='n')
+    waterquality = models.CharField(max_length=1, default='n')
+    dart = models.CharField(max_length=1, default='n')
     seq = models.PositiveSmallIntegerField("seq attribute", blank=True)
 
     def __str__(self):
