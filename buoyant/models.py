@@ -5,9 +5,7 @@ class Buoy(models.Model):
     station_id = models.CharField(max_length=10)
     name = models.CharField(max_length=200)
     owner = models.CharField(max_length=200)
-    location = models.PointField(geography=True)
-    lat = models.DecimalField("latitude", max_digits=9, decimal_places=6)
-    lon = models.DecimalField("longitude", max_digits=9, decimal_places=6)
+    location = models.PointField(spatial_index=True, geography=True)
     elev = models.PositiveSmallIntegerField("elevation", blank=True)
     pgm = models.CharField(max_length=50)
     buoy_type = models.CharField(max_length=10)
@@ -19,11 +17,6 @@ class Buoy(models.Model):
 
     def __str__(self):
         return self.name
-
-    def save(self, *args, **kwargs):
-        self.lat = self.location.y
-        self.lon = self.location.x
-        super(Buoy, self).save(*args, **kwargs)
 
 
 class Observation(models.Model):
