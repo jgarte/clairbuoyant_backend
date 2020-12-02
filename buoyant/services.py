@@ -2,6 +2,8 @@
 # ? considering this namespace for scraping logic instead of model/view/admin
 import requests
 from bs4 import BeautifulSoup as bs
+from buoyant.models import Buoy
+from django.contrib.gis.geos import Point
 
 
 def NDBCScraper():
@@ -27,27 +29,42 @@ def NDBCScraper():
     ACTIVESTATIONS_XML = "https://www.ndbc.noaa.gov/activestations.xml"
     # OBS_ENDPOINT = "https://sdf.ndbc.noaa.gov/sos/server.php"
 
-    def get_station_xml():
+    def get_activestations():
+        """Extract NDBC's activestations from `activestations.xml` endpoint."""
         xml_data = requests.get(ACTIVESTATIONS_XML).content
 
         soup = bs(xml_data, "xml")
-        stations = soup.find_all('station')
-        print(len(stations))  # => 1439
 
-        # Buoy.create!(
-        # station_code: station[:id],
-        # station_name: station[:name],
-        # station_owner: station[:owner],
-        # latitude: station[:lat], longitude: station[:lon],
-        # pgm: station[:pgm], type: station[:type],
-        # elev: station[:elev],
-        # met: station[:met],
-        # dart: station[:dart],
-        # currents: station[:currents],
-        # waterquality: station[:waterquality])
+        return soup.find_all('station')
+
+    def parse_activestations(stations):
+        parsed_stations_obj = []
+        for station in stations:
+            station = station.attrs
+            lon, lat = float(station.get('lon', 0.0)), float(station.get('lat', 0.0))
+            geo = Point(lon, lat)
+            #! DevNote - emptyString handling is not Null in psql.
+            parsed_stations_obj.append(Buoy(
+                location=geo,
+                station_id=station.get('id'),
+                name=station.get('name'),
+                owner=station.get('owner'),
+                elev=station.get('elev'),
+                pgm=station.get('pgm'),
+                buoy_type=station.get('type'),
+                met=station.get('met', ''),
+                currents=station.get('currents', ''),
+                waterquality=station.get('waterquality', ''),
+                dart=station.get('dart', ''),
+                seq=station.get('seq'),
+            ))
+        return parsed_stations_obj
+
+    def persist_parsed(stations):
+        Buoy.objects.bulk_create(stations)
 
     def realtime_meteorological_data(station_id):
-        pass
+        ...
         # station_code string should be capitalized in url
         # capitalized_station_id = station_id.upcase
         # realtime_url = "https://www.ndbc.noaa.gov/data/realtime2/#{capitalized_station_id}.txt"
@@ -61,11 +78,11 @@ def NDBCScraper():
         #     nil
 
     def parse_realtime_meteorological_data(data):
-        pass
+        ...
         # data.map { |row| row.split(" ") }#.transpose
 
     def fetch_data(station_id, data):
-        pass
+        ...
         # buoy = Buoy.find_by(station_code: station_id)
         # data_arr_table = self.parse_realtime_meteorological_data(data)
         # data_arr_table.shift(2)
@@ -92,12 +109,25 @@ def NDBCScraper():
         #         tide: row[18],
         #     )
 
-    def run():
-        get_station_xml()
+    def seed_buoy_data():
+        stations = parse_activestations(get_activestations())
+        persist_parsed(stations)
         # Buoy.all.each do |buoy_obj|
         #     self.realtime_meteorological_data(buoy_obj.station_code)
 
-    run()
+    """
+    # TODO - Redesign scraper functionality to seperate concerns (i.e., CRUD).
+        ?# Additional Consideration: class vs fn, and scraper location?
+        - Initial Seeding tasks:
+            # Seed buoys table with Buoy information.
+        - Updating:
+            # Check buoy for updated attributes to signal whether further
+                action is necessary; do not override data - only update particular cells.
+        - Observations:
+            # Create new observational records, which are dervived from a buoy.
+    """
+
+    # seed_buoy_data()
 
 
 """NOTE: XML Data
@@ -133,5 +163,3 @@ def NDBCScraper():
  - dart: indicates whether the station has reported water column height/tsunami
    data in the past 24 hours (y/n).
 """
-
-NDBCScraper()
