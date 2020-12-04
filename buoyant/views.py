@@ -1,3 +1,8 @@
-from django.shortcuts import render
+from buoyant.models import Buoy
+from buoyant.serializers import BuoySerializer
+from rest_framework import viewsets
 
-# Create your views here.
+
+class BuoyView(viewsets.ModelViewSet):
+    queryset = Buoy.objects.all()
+    serializer_class = BuoySerializer
