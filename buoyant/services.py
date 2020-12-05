@@ -63,7 +63,7 @@ def NDBCScraper():
     def persist_parsed(stations):
         Buoy.objects.bulk_create(stations)
 
-    def realtime_meteorological_data(station_id):
+    def get_realtime_meteorological_data(station):
         ...
         # station_code string should be capitalized in url
         # capitalized_station_id = station_id.upcase
