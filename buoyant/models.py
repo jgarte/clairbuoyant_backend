@@ -20,7 +20,7 @@ class Buoy(models.Model):
 
 
 class Observation(models.Model):
-    buoy = models.ForeignKey('buoy', on_delete=models.CASCADE)
+    buoy = models.ForeignKey(Buoy, on_delete=models.CASCADE)
 
     """Buoy Data Properties.
 
