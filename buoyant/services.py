@@ -27,6 +27,7 @@ def NDBCScraper():
         responseformat=text/csv
     """
     ACTIVESTATIONS_XML = "https://www.ndbc.noaa.gov/activestations.xml"
+    REALTIME_URL = "https://www.ndbc.noaa.gov/data/realtime2/"
     # OBS_ENDPOINT = "https://sdf.ndbc.noaa.gov/sos/server.php"
 
     def get_activestations():
@@ -35,51 +36,49 @@ def NDBCScraper():
 
         soup = bs(xml_data, "xml")
 
-        return soup.find_all('station')
+        return soup.find_all("station")
 
     def parse_activestations(stations):
         parsed_stations_obj = []
         for station in stations:
             station = station.attrs
-            lon, lat = float(station.get('lon', 0.0)), float(station.get('lat', 0.0))
+            lon, lat = float(station.get("lon", 0.0)), float(station.get("lat", 0.0))
             geo = Point(lon, lat)
             #! DevNote - emptyString handling is not Null in psql.
-            parsed_stations_obj.append(Buoy(
-                location=geo,
-                station_id=station.get('id'),
-                name=station.get('name'),
-                owner=station.get('owner'),
-                elev=station.get('elev'),
-                pgm=station.get('pgm'),
-                buoy_type=station.get('type'),
-                met=station.get('met', ''),
-                currents=station.get('currents', ''),
-                waterquality=station.get('waterquality', ''),
-                dart=station.get('dart', ''),
-                seq=station.get('seq'),
-            ))
+            parsed_stations_obj.append(
+                Buoy(
+                    location=geo,
+                    station_id=station.get("id"),
+                    name=station.get("name"),
+                    owner=station.get("owner"),
+                    elev=station.get("elev"),
+                    pgm=station.get("pgm"),
+                    buoy_type=station.get("type"),
+                    met=station.get("met", ""),
+                    currents=station.get("currents", ""),
+                    waterquality=station.get("waterquality", ""),
+                    dart=station.get("dart", ""),
+                    seq=station.get("seq"),
+                )
+            )
         return parsed_stations_obj
 
     def persist_parsed(stations):
         Buoy.objects.bulk_create(stations)
 
     def get_realtime_meteorological_data(station):
-        ...
-        # station_code string should be capitalized in url
-        # capitalized_station_id = station_id.upcase
-        # realtime_url = "https://www.ndbc.noaa.gov/data/realtime2/#{capitalized_station_id}.txt"
-        # begin
-        #     content = URI.open(realtime_url).read
-        #     arr = []
-        #     content.each_line { |row| arr.push(row)}
-        #     self.fetch_data(station_id, arr)
-        # rescue
-        #     puts "404"
-        #     nil
+        realtime_url = REALTIME_URL + f"#{station.station_id}.txt"
+        station_content = requests.get(
+            "https://www.ndbc.noaa.gov/data/realtime2/44065.txt"
+        ).text
+        soup = bs(station_content, "lxml")
+        table = soup.find("p")
+        table_output = table.get_text()
 
-    def parse_realtime_meteorological_data(data):
-        ...
-        # data.map { |row| row.split(" ") }#.transpose
+        # iterates line by line
+        # format and save data
+        for line in table_output.splitlines():
+            ...
 
     def fetch_data(station_id, data):
         ...
@@ -128,6 +127,7 @@ def NDBCScraper():
     """
 
     # seed_buoy_data()
+    get_realtime_meteorological_data(Buoy.objects.first())
 
 
 """NOTE: XML Data
