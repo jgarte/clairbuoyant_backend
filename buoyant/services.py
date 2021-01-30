@@ -1,6 +1,7 @@
 """NDBC Scraper Service."""
-# ? considering this namespace for scraping logic instead of model/view/admin
+import datetime
 import requests
+import pytz
 from bs4 import BeautifulSoup as bs
 from buoyant.models import Buoy
 from django.contrib.gis.geos import Point
@@ -67,18 +68,37 @@ def NDBCScraper():
         Buoy.objects.bulk_create(stations)
 
     def get_realtime_meteorological_data(station):
-        realtime_url = REALTIME_URL + f"#{station.station_id}.txt"
-        station_content = requests.get(
-            "https://www.ndbc.noaa.gov/data/realtime2/44065.txt"
-        ).text
+        realtime_url = REALTIME_URL + f"{station.station_id}.txt"
+
+        station_content = requests.get(realtime_url).text
         soup = bs(station_content, "lxml")
         table = soup.find("p")
         table_output = table.get_text()
 
-        # iterates line by line
-        # format and save data
-        for line in table_output.splitlines():
-            ...
+        for line in table_output.splitlines()[2:]:
+            line_list = (" ".join(line.split())).split(" ")
+            observation_date = [int(datedata) for datedata in line_list[0:5]]
+            observation_date = datetime.datetime(*observation_date, tzinfo=pytz.UTC)
+
+            clean_line_list = [v if v != "MM" else None for v in line_list[5:]]
+            record = {
+                "observation_date": observation_date,
+                "wind_dir": clean_line_list[0],
+                "wind_speed": clean_line_list[1],
+                "wind_gust": clean_line_list[2],
+                "wave_height": clean_line_list[3],
+                "dom_wave_period": clean_line_list[4],
+                "avg_wave_period": clean_line_list[5],
+                "wave_dir": clean_line_list[6],
+                "sea_pressure": clean_line_list[7],
+                "air_temp": clean_line_list[8],
+                "sea_temp": clean_line_list[9],
+                "dewpoint_temp": clean_line_list[10],
+                "station_visibility": clean_line_list[11],
+                "pressure_tendency": clean_line_list[12] or "MM",
+                "tide": clean_line_list[13] or "MM",
+            }
+            station.meteorological_set.create(**record)
 
     def fetch_data(station_id, data):
         ...
@@ -111,8 +131,6 @@ def NDBCScraper():
     def seed_buoy_data():
         stations = parse_activestations(get_activestations())
         persist_parsed(stations)
-        # Buoy.all.each do |buoy_obj|
-        #     self.realtime_meteorological_data(buoy_obj.station_code)
 
     """
     # TODO - Redesign scraper functionality to seperate concerns (i.e., CRUD).
@@ -126,8 +144,13 @@ def NDBCScraper():
             # Create new observational records, which are dervived from a buoy.
     """
 
+    def seed_meteorological_data():
+        # for buoy in Buoy.objects.all():
+        # get_realtime_meteorological_data(buoy)
+        get_realtime_meteorological_data(Buoy.objects.get(station_id=44065))
+
     # seed_buoy_data()
-    get_realtime_meteorological_data(Buoy.objects.first())
+    seed_meteorological_data()
 
 
 """NOTE: XML Data
