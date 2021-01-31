@@ -45,7 +45,7 @@ def NDBCScraper():
             station = station.attrs
             lon, lat = float(station.get("lon", 0.0)), float(station.get("lat", 0.0))
             geo = Point(lon, lat)
-            #! DevNote - emptyString handling is not Null in psql.
+
             parsed_stations_obj.append(
                 Buoy(
                     location=geo,
@@ -100,80 +100,17 @@ def NDBCScraper():
             }
             station.meteorological_set.create(**record)
 
-    def fetch_data(station_id, data):
-        ...
-        # buoy = Buoy.find_by(station_code: station_id)
-        # data_arr_table = self.parse_realtime_meteorological_data(data)
-        # data_arr_table.shift(2)
-        # data_arr_table.each_with_index do | row, row_idx |
-        #     puts "#{row}  #{row_idx}"
-        #     # requires refactoring column names to correspond to incoming data
-        #     # row.each_with_index do | datum, data_idx |
-        #     time_s = row[0] + '-' + row[1] + '-' + row[2] + ' ' + row[3] + ':' + row[4]
-        #     record = buoy.meteorological_data.build(
-        #         recorded_data_at: DateTime.parse(time_s),
-        #         wind_dir: row[5].to_i,
-        #         wind_speed:row[6].to_f,
-        #         wind_gust: row[7].to_f,
-        #         wave_height: row[8].to_f,
-        #         dom_wave_period: row[9].to_i,
-        #         avg_wave_period: row[10].to_f,
-        #         wave_dir: row[11].to_i,
-        #         sea_pressure: row[12].to_f,
-        #         air_temp: row[13].to_f,
-        #         sea_temp: row[14].to_f,
-        #         dewpoint_temp: row[15],
-        #         station_visibility: row[16].to_f,
-        #         pressure_tency: row[17],
-        #         tide: row[18],
-        #     )
-
     def seed_buoy_data():
         stations = parse_activestations(get_activestations())
         persist_parsed(stations)
 
-    """
-    # TODO - Redesign scraper functionality to seperate concerns (i.e., CRUD).
-        ?# Additional Consideration: class vs fn, and scraper location?
-        - Initial Seeding tasks:
-            # Seed buoys table with Buoy information.
-        - Updating:
-            # Check buoy for updated attributes to signal whether further
-                action is necessary; do not override data - only update particular cells.
-        - Observations:
-            # Create new observational records, which are dervived from a buoy.
-    """
-
     def seed_meteorological_data():
-        # for buoy in Buoy.objects.all():
-        # get_realtime_meteorological_data(buoy)
-        get_realtime_meteorological_data(Buoy.objects.get(station_id=44065))
+        for buoy in Buoy.objects.all():
+            get_realtime_meteorological_data(buoy)
 
     # seed_buoy_data()
-    seed_meteorological_data()
+    # seed_meteorological_data()
 
-
-"""NOTE: XML Data
-<ows:Keywords>
-    <ows:Keyword>Weather</ows:Keyword>
-    <ows:Keyword>National Data Buoy Center</ows:Keyword>
-    <ows:Keyword>NDBC</ows:Keyword>
-    <ows:Keyword>Moored Buoy</ows:Keyword>
-    <ows:Keyword>C-MAN</ows:Keyword>
-    <ows:Keyword>DART</ows:Keyword>
-    <ows:Keyword>TAO</ows:Keyword>
-    <ows:Keyword>Air Temperature</ows:Keyword>
-    <ows:Keyword>Barometric Pressure</ows:Keyword>
-    <ows:Keyword>Conductivity</ows:Keyword>
-    <ows:Keyword>Ocean Currents</ows:Keyword>
-    <ows:Keyword>Salinity</ows:Keyword>
-    <ows:Keyword>Water Level</ows:Keyword>
-    <ows:Keyword>Water Temperature</ows:Keyword>
-    <ows:Keyword>Waves</ows:Keyword>
-    <ows:Keyword>Winds</ows:Keyword>
-</ows:Keywords>
-
-"""
 
 """NOTE:
  Update attributes if the below is checked 'y' / or other.
