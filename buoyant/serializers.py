@@ -24,6 +24,8 @@ class MeteorologicalSerializer(serializers.ModelSerializer):
 
 
 class BuoySerializer(serializers.ModelSerializer):
+    meteorological_set = MeteorologicalSerializer(many=True, read_only=True)
+
     class Meta:
         model = Buoy
         fields = [
@@ -38,4 +40,5 @@ class BuoySerializer(serializers.ModelSerializer):
             "currents",
             "waterquality",
             "dart",
+            "meteorological_set",
         ]
