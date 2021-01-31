@@ -7,7 +7,7 @@ from buoyant.models import Buoy
 from django.contrib.gis.geos import Point
 
 
-def NDBCScraper():
+def NDBCScraper_Buoy():
     """NDBC Scraper.
 
     Request Parameters for Observations.
@@ -28,7 +28,6 @@ def NDBCScraper():
         responseformat=text/csv
     """
     ACTIVESTATIONS_XML = "https://www.ndbc.noaa.gov/activestations.xml"
-    REALTIME_URL = "https://www.ndbc.noaa.gov/data/realtime2/"
     # OBS_ENDPOINT = "https://sdf.ndbc.noaa.gov/sos/server.php"
 
     def get_activestations():
@@ -67,6 +66,16 @@ def NDBCScraper():
     def persist_parsed(stations):
         Buoy.objects.bulk_create(stations)
 
+    def seed_buoy_data():
+        stations = parse_activestations(get_activestations())
+        persist_parsed(stations)
+
+    seed_buoy_data()
+
+
+def NDBCScraper_MetData():
+    REALTIME_URL = "https://www.ndbc.noaa.gov/data/realtime2/"
+
     def get_realtime_meteorological_data(station):
         realtime_url = REALTIME_URL + f"{station.station_id}.txt"
 
@@ -100,16 +109,11 @@ def NDBCScraper():
             }
             station.meteorological_set.create(**record)
 
-    def seed_buoy_data():
-        stations = parse_activestations(get_activestations())
-        persist_parsed(stations)
-
     def seed_meteorological_data():
         for buoy in Buoy.objects.all():
             get_realtime_meteorological_data(buoy)
 
-    # seed_buoy_data()
-    # seed_meteorological_data()
+    seed_meteorological_data()
 
 
 """NOTE:
