@@ -1,8 +1,31 @@
-from buoyant.models import Buoy
+from buoyant.models import Buoy, Meteorological
 from rest_framework import serializers
 
 
+class MeteorologicalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Meteorological
+        fields = [
+            "observation_date",
+            "wind_speed",
+            "wind_gust",
+            "wave_height",
+            "dom_wave_period",
+            "avg_wave_period",
+            "wave_dir",
+            "sea_pressure",
+            "air_temp",
+            "sea_temp",
+            "tide",
+            "dewpoint_temp",
+            "station_visibility",
+            "pressure_tendency",
+        ]
+
+
 class BuoySerializer(serializers.ModelSerializer):
+    meteorological_set = MeteorologicalSerializer(many=True, read_only=True)
+
     class Meta:
         model = Buoy
         fields = [
@@ -17,4 +40,5 @@ class BuoySerializer(serializers.ModelSerializer):
             "currents",
             "waterquality",
             "dart",
+            "meteorological_set",
         ]
